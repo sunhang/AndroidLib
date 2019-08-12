@@ -11,9 +11,9 @@ import java.util.concurrent.SynchronousQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 
-private val fileExecutor = ThreadPoolExecutor(1, 4, 60L, TimeUnit.SECONDS, SynchronousQueue<Runnable>())
+val fileExecutor = ThreadPoolExecutor(1, 4, 60L, TimeUnit.SECONDS, SynchronousQueue<Runnable>())
 
-private val dbExecutor = Executors.newSingleThreadExecutor()
+val dbExecutor = Executors.newSingleThreadExecutor()
 
 /** 主线程 **/
 fun runOnMain(task: () -> Unit) = runOnSpecialScheduler(AndroidSchedulers.mainThread(), task)
