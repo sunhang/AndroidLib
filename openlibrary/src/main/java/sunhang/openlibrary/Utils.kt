@@ -1,6 +1,7 @@
 package sunhang.openlibrary
 
 import android.content.Context
+import android.content.res.Configuration
 import android.os.Build
 
 fun dumpDeviceInfo(): String {
@@ -37,4 +38,30 @@ fun getScreenWidthOfPortraitMode(context: Context): Int {
 
     // 返回屏幕在竖屏时的宽度
     return if (width < height) width else height
+}
+
+val Context.screenWidth: Int
+    get() = resources.displayMetrics.widthPixels
+
+val Context.screenHeight: Int
+    get() = resources.displayMetrics.heightPixels
+
+val Context.isPortrait: Boolean
+    get() = resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
+
+fun methodStack(): String {
+    val elements = Thread.currentThread().stackTrace
+    val stringBuilder = StringBuilder()
+
+    // 前三个暂时用不上
+    for (i in 3 until elements.size) {
+        val element = elements[i]
+
+        val clsName = element.className
+        val methodName = element.methodName
+        stringBuilder.append("${clsName}#${methodName}+${element.lineNumber}")
+        stringBuilder.append("\n")
+    }
+
+    return stringBuilder.toString()
 }
