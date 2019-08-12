@@ -47,20 +47,36 @@ fun <T> runOnIO(task: () -> T, callback: (T?) -> Unit) = runOnSpecialScheduler(S
 
 private data class Optional<M>(val value : M?)
 
-private fun runOnSpecialScheduler(scheduler: Scheduler, task: () -> Unit): Disposable {
-    return Completable.fromCallable(task)
+private fun runOnSpecialScheduler(scheduler: Scheduler, task: () -> Unit): ThreadDisposable {
+    val disposable = Completable.fromCallable(task)
         .subscribeOn(scheduler)
         .subscribe({}, handleThrowable)
+
+    // 避免把rxjava库中的Disposable暴露给外界，因为外界有可能没有使用到rxjava的库
+    return object : ThreadDisposable {
+        override val isDisposed: Boolean
+            get() = disposable.isDisposed
+
+        override fun dispose() = disposable.dispose()
+    }
 }
 
-private fun <T> runOnSpecialScheduler(scheduler: Scheduler, task: () -> T?, callback: (T?) -> Unit): Disposable {
+private fun <T> runOnSpecialScheduler(scheduler: Scheduler, task: () -> T?, callback: (T?) -> Unit): ThreadDisposable {
     /**使用[Optional]的原因是，rxjava不允许返回null了, 否则抛出异常**/
-    return Single.fromCallable { return@fromCallable Optional<T?>(task.invoke()) }
+    val disposable =  Single.fromCallable { return@fromCallable Optional<T?>(task.invoke()) }
         .subscribeOn(scheduler)
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe({
             callback.invoke(it.value)
         }, handleThrowable)
+
+    // 避免把rxjava库中的Disposable暴露给外界，因为外界有可能没有使用到rxjava的库
+    return object : ThreadDisposable {
+        override val isDisposed: Boolean
+            get() = disposable.isDisposed
+
+        override fun dispose() = disposable.dispose()
+    }
 }
 
 
@@ -72,4 +88,8 @@ private val handleThrowable = { it: Throwable ->
     }
 }
 
+interface ThreadDisposable {
+    val isDisposed: Boolean
+    fun dispose()
+}
 
