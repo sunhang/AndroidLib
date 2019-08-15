@@ -4,14 +4,11 @@ import io.reactivex.Completable
 import io.reactivex.Scheduler
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import java.util.concurrent.Executors
-import java.util.concurrent.SynchronousQueue
-import java.util.concurrent.ThreadPoolExecutor
-import java.util.concurrent.TimeUnit
 
-private val fileExecutor = ThreadPoolExecutor(1, 4, 60L, TimeUnit.SECONDS, SynchronousQueue<Runnable>())
+/** 适合于小文件的读写操作，不支持大文件的读写操作，因为它被设计成单线程排队机制 **/
+private val fileExecutor = Executors.newSingleThreadExecutor { Thread(it, "file-thread") }
 
 private val dbExecutor = Executors.newSingleThreadExecutor()
 
@@ -25,7 +22,7 @@ fun runOnMain(task: () -> Unit) = runOnSpecialScheduler(AndroidSchedulers.mainTh
 /** 主线程 **/
 fun <T> runOnMain(task: () -> T?, callback: (T?) -> Unit) = runOnSpecialScheduler(AndroidSchedulers.mainThread(), task, callback)
 
-/** 文件相关操作，比如移动、复制等 **/
+/** 文件相关操作，比如移动、复制等。适合于小文件的读写操作，不支持大文件的读写操作，因为它被设计成单线程排队机制 **/
 fun runOnFile(task: () -> Unit) = runOnSpecialScheduler(Schedulers.from(fileExecutor), task)
 
 /** 文件相关操作，比如移动、复制等 **/
