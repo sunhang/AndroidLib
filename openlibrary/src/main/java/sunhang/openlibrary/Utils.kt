@@ -65,3 +65,9 @@ fun methodStack(): String {
 
     return stringBuilder.toString()
 }
+
+fun <T> T.checkAndModify(condition: Boolean, modify: (T) -> T): T {
+    return if (condition) {
+        modify(this)
+    } else this
+}
