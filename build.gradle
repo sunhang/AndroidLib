@@ -18,8 +18,8 @@ buildscript {
 allprojects {
     repositories {
         google()
-//        jcenter()
-        jcenter(){ url 'http://jcenter.bintray.com/'} // 可能由于你懂的原因，jcenter()不能直接用
+        jcenter()
+//        jcenter(){ url 'http://jcenter.bintray.com/'} // 可能由于你懂的原因，jcenter()不能直接用
 //        maven{url 'http://maven.aliyun.com/nexus/content/groups/public/'}
     }
 }
